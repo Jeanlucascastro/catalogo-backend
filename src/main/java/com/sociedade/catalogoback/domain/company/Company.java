@@ -1,5 +1,6 @@
 package com.sociedade.catalogoback.domain.company;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sociedade.catalogoback.domain.GenericEntity;
 import com.sociedade.catalogoback.domain.user.User;
 import jakarta.persistence.Column;
@@ -32,6 +33,7 @@ public class Company extends GenericEntity {
     @Column
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "company")
     private List<User> users = new ArrayList<>();
 

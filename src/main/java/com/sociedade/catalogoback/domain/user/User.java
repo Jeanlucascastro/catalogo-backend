@@ -44,6 +44,10 @@ public class User implements UserDetails {
         else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
     @Override
     public String getUsername() {
         return login;
