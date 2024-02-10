@@ -1,5 +1,6 @@
 package com.sociedade.catalogoback.domain.user;
 
+import com.sociedade.catalogoback.domain.company.Company;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -26,10 +27,15 @@ public class User implements UserDetails {
     private String password;
     private UserRole role;
 
-    public User(String login, String password, UserRole role){
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
+    public User(String login, String password, UserRole role, Company company){
         this.login = login;
         this.password = password;
         this.role = role;
+        this.company = company;
     }
 
     @Override
