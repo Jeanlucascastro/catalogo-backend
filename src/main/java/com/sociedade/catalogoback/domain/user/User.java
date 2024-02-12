@@ -10,11 +10,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Table(name = "users_auth")
-@Entity(name = "users")
+@Entity(name = "user")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,16 +28,9 @@ public class User implements UserDetails {
     private String password;
     private UserRole role;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @ManyToMany(mappedBy = "users")
+    private List<Company> companies = new ArrayList<>();
 
-    public User(String login, String password, UserRole role, Company company){
-        this.login = login;
-        this.password = password;
-        this.role = role;
-        this.company = company;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -44,8 +38,8 @@ public class User implements UserDetails {
         else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setCompanies(List<Company> companies) {
+        this.companies = companies;
     }
 
     @Override

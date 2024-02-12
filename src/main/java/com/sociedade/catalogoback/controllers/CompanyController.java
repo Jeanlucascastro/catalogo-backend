@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController()
 @RequestMapping(value = "/company")
 public class CompanyController {
@@ -83,5 +85,12 @@ public class CompanyController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/users/{id}")
+    public ResponseEntity<List<User>> findUsersByCompany(@PathVariable Long id) {
+        List<User> users = this.companyService.getUsersByCompanyId(id);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 }

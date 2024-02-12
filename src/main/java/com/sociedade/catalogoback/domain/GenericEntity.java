@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
+
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -12,16 +14,17 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "deleted = false")
 public class GenericEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column()
-    private boolean deleted;
+    private Boolean deleted;
 
     @Column()
-    private boolean ativo;
+    private Boolean ativo;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_create")

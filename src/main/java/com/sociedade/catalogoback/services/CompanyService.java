@@ -16,8 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class CompanyService {
@@ -31,24 +32,19 @@ public class CompanyService {
     @Transactional
     public Company saveCompany(@RequestBody @Valid CreateCompanyDTO companyDTO, User user) {
 
-        List<User> users = new ArrayList<>();
-        users.add(user);
-
         Company company = new Company();
 
         company.setName(companyDTO.name());
         company.setDescription(companyDTO.description());
-//        company.setUsers(users);
 
         Company newCompany = this.companyRepository.save(company);
 
-        User existingUser = (User) this.userRepository.findByLogin(user.getLogin());
+        company.getUsers().add(user);
+        company.setDeleted(false);
+        company.setAtivo(true);
 
-        existingUser.setCompany(newCompany);
 
-        this.userRepository.save(existingUser);
-
-        return this.companyRepository.save(company);
+        return this.companyRepository.save(newCompany);
     }
 
     public Company updateById(@PathVariable Long id, @RequestBody final CreateCompanyDTO companyDTO) {
@@ -80,6 +76,17 @@ public class CompanyService {
     public Company findById(Long id) {
         return this.companyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa não encontrado com o ID: " + id));
+    }
+
+
+    public List<User> getUsersByCompanyId(Long companyId) {
+        Optional<Company> companyOptional = companyRepository.findById(companyId);
+        if (companyOptional.isPresent()) {
+            Company company = companyOptional.get();
+            return company.getUsers();
+        } else {
+            throw new EntityNotFoundException("Empresa não encontrado com o ID: " + companyId);
+        }
     }
 
 }

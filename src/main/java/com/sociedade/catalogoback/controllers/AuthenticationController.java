@@ -1,18 +1,20 @@
 package com.sociedade.catalogoback.controllers;
 
+import com.sociedade.catalogoback.domain.company.Company;
 import com.sociedade.catalogoback.domain.user.*;
 import com.sociedade.catalogoback.repositories.UserRepository;
 import com.sociedade.catalogoback.security.TokenService;
+import com.sociedade.catalogoback.services.AuthorizationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("auth")
@@ -23,6 +25,9 @@ public class AuthenticationController {
     private UserRepository repository;
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private AuthorizationService authService;
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data){
@@ -41,10 +46,19 @@ public class AuthenticationController {
         if(this.repository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new User(data.login(), encryptedPassword, data.role(), null);
+        List<Company> companies = Collections.emptyList();
+        User newUser = new User(null, data.login(), encryptedPassword, data.role(), companies);
 
         User save = this.repository.save(newUser);
 
         return ResponseEntity.ok().build();
     }
+
+
+    @GetMapping("/companies/{userId}")
+    public ResponseEntity<List<Company>> getCompaniesByUser(@PathVariable("userId") String userId) {
+        List<Company> companies = authService.getCompaniesByUserId(userId);
+        return ResponseEntity.ok(companies);
+    }
+
 }
