@@ -51,7 +51,9 @@ public class AuthenticationController {
 
         User save = this.repository.save(newUser);
 
-        return ResponseEntity.ok().build();
+        RegisterDTO userLogged = new RegisterDTO(save.getLogin(), null, save.getRole());
+
+        return ResponseEntity.ok().body(userLogged);
     }
 
 
