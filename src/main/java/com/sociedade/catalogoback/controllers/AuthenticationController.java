@@ -2,6 +2,10 @@ package com.sociedade.catalogoback.controllers;
 
 import com.sociedade.catalogoback.domain.company.Company;
 import com.sociedade.catalogoback.domain.user.*;
+import com.sociedade.catalogoback.domain.user.dto.AuthenticationDTO;
+import com.sociedade.catalogoback.domain.user.dto.LoginResponseDTO;
+import com.sociedade.catalogoback.domain.user.dto.RegisterDTO;
+import com.sociedade.catalogoback.domain.user.dto.UserDTO;
 import com.sociedade.catalogoback.repositories.UserRepository;
 import com.sociedade.catalogoback.security.TokenService;
 import com.sociedade.catalogoback.services.AuthorizationService;
@@ -30,11 +34,11 @@ public class AuthenticationController {
     private AuthorizationService authService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data){
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data){
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
         User user = (User) this.repository.findByLogin(data.login());
-        UserDTO  userDTO = new UserDTO(user.getId(), user.getLogin(), user.getUsername());
+        UserDTO userDTO = new UserDTO(user.getId(), user.getLogin(), user.getUsername());
 
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
