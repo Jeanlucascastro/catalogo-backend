@@ -1,39 +1,25 @@
-FROM openjdk:21
-
-# Baixe o PostgreSQL e extraia os binários
-RUN wget --quiet -O /tmp/postgresql_key https://www.postgresql.org/media/keys/ACCC4CF8.asc
-
-# Adicione a chave GPG
-RUN apt-key add /tmp/postgresql_key
-
-# Adicione o repositório do PostgreSQL às fontes do apt
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-
-# Atualize os pacotes e instale o cliente PostgreSQL
-RUN apt-get update && apt-get install -y postgresql-client-common postgresql-client
-
-# Limpeza de arquivos temporários
-RUN rm -rf /tmp/postgresql_key
+FROM openjdk:17 AS builder
 
 WORKDIR /app
 
-COPY pom.xml ./
+COPY pom.xml .
+RUN mvn clean install
 
-RUN mvn -f pom.xml clean install
+COPY target/*.jar .
 
-COPY target/*.jar ./
+FROM postgres:14.4
 
-# Configure Spring Boot application properties
-RUN echo "spring.datasource.url=jdbc:postgresql://localhost:5432/sistemacatalogo" > application.properties
-RUN echo "spring.datasource.username=postgres" >> application.properties
-RUN echo "spring.datasource.password=postgres" >> application.properties
+WORKDIR /var/lib/postgresql/data
 
-# Enable JPA and configure properties
-RUN echo "spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true" >> application.properties
-RUN echo "spring.jpa.hibernate.ddl-auto=update" >> application.properties
-RUN echo "spring.jpa.show-sql=true" >> application.properties
-RUN echo "spring.jpa.properties.hibernate.format_sql=true" >> application.properties
+COPY --from=builder /app/target/*.jar .
 
-CMD ["java", "-jar", "*.jar"]
+ENV POSTGRES_DB=sistemacatalogo
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
 
-EXPOSE 8080
+RUN echo "host all all 0.0.0.0/0 md5" >> pg_hba.conf
+RUN echo "listen_addresses = '*'" >> postgresql.conf
+
+EXPOSE 5432
+
+CMD ["docker-entrypoint.sh", "postgres"]
