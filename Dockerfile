@@ -1,25 +1,6 @@
-FROM openjdk:17 AS builder
-
+FROM eclipse-temurin:17-jdk-alpine
+VOLUME /tmp
+ARG JAR_FILE
 WORKDIR /app
-
-COPY pom.xml .
-RUN mvn clean install
-
-COPY target/*.jar .
-
-FROM postgres:14.4
-
-WORKDIR /var/lib/postgresql/data
-
-COPY --from=builder /app/target/*.jar .
-
-ENV POSTGRES_DB=sistemacatalogo
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
-
-RUN echo "host all all 0.0.0.0/0 md5" >> pg_hba.conf
-RUN echo "listen_addresses = '*'" >> postgresql.conf
-
-EXPOSE 5432
-
-CMD ["docker-entrypoint.sh", "postgres"]
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","app.jar"]

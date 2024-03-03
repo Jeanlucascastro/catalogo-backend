@@ -9,8 +9,11 @@ import com.sociedade.catalogoback.domain.user.dto.UserDTO;
 import com.sociedade.catalogoback.repositories.UserRepository;
 import com.sociedade.catalogoback.security.TokenService;
 import com.sociedade.catalogoback.services.AuthorizationService;
+import io.swagger.annotations.ApiOperation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("auth")
@@ -38,7 +42,7 @@ public class AuthenticationController {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
         User user = (User) this.repository.findByLogin(data.login());
-        UserDTO userDTO = new UserDTO(user.getId(), user.getLogin(), user.getUsername());
+        UserDTO userDTO = new UserDTO(user.getId(), user.getLogin(), user.getEmail(), user.getUsername());
 
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
@@ -51,11 +55,11 @@ public class AuthenticationController {
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         List<Company> companies = Collections.emptyList();
-        User newUser = new User(null, data.login(), encryptedPassword, data.role(), companies);
+        User newUser = new User(null, data.login(), data.email(), encryptedPassword, data.role(), false, companies);
 
         User save = this.repository.save(newUser);
 
-        RegisterDTO userLogged = new RegisterDTO(save.getLogin(), null, save.getRole());
+        RegisterDTO userLogged = new RegisterDTO(save.getId(), save.getLogin(), save.getEmail(), save.getRole());
 
         return ResponseEntity.ok().body(userLogged);
     }
@@ -66,5 +70,36 @@ public class AuthenticationController {
         List<Company> companies = authService.getCompaniesByUserId(userId);
         return ResponseEntity.ok(companies);
     }
+
+    @PutMapping("{id}")
+    @ApiOperation(value = "Update current user by Id")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable("id") String id, UserDTO userUpdated) {
+        Optional<User> currentUser = this.authService.findById(id);
+
+        if (currentUser.isPresent()) {
+            User us = currentUser.get();
+            us.setEmail(userUpdated.email());
+            us.setLogin(userUpdated.login());
+            this.repository.save(us);
+            return ResponseEntity.ok().body(userUpdated);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @ApiOperation(value = "Set User deleted")
+    public ResponseEntity<Boolean> deleteCompany(@PathVariable String id) {
+        try {
+            this.authService.delete(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }

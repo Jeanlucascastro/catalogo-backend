@@ -21,7 +21,6 @@ import java.util.List;
 public class Company extends GenericEntity {
 
     @Column
-    @Getter
     private String name;
 
     @Column
@@ -36,3 +35,5 @@ public class Company extends GenericEntity {
     private List<User> users = new ArrayList<>();
 
 }
+
+

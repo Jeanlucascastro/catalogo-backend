@@ -5,6 +5,7 @@ import com.sociedade.catalogoback.domain.company.dto.CreateCompanyDTO;
 import com.sociedade.catalogoback.domain.user.User;
 import com.sociedade.catalogoback.exception.GenericException;
 import com.sociedade.catalogoback.services.CompanyService;
+import io.swagger.annotations.ApiOperation;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -89,6 +90,7 @@ public class CompanyController {
 
     @ResponseBody
     @GetMapping(value = "/users/{id}")
+    @ApiOperation(value = "Find User by Company ID")
     public ResponseEntity<List<User>> findUsersByCompany(@PathVariable Long id) {
         List<User> users = this.companyService.getUsersByCompanyId(id);
         return new ResponseEntity<>(users, HttpStatus.OK);

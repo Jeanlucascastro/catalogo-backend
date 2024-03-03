@@ -2,10 +2,7 @@ package com.sociedade.catalogoback.domain.user;
 
 import com.sociedade.catalogoback.domain.company.Company;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,10 +21,20 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Setter
     private String login;
+    @Setter
+    private String email;
+
     private String password;
+
+    @Setter
     private UserRole role;
 
+    @Setter
+    private Boolean deleted;
+
+    @Setter
     @ManyToMany(mappedBy = "users")
     private List<Company> companies = new ArrayList<>();
 
@@ -36,10 +43,6 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if(this.role == UserRole.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-    }
-
-    public void setCompanies(List<Company> companies) {
-        this.companies = companies;
     }
 
     @Override
