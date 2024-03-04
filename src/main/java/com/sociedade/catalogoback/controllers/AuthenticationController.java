@@ -50,7 +50,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterDTO> register(@RequestBody @Valid RegisterDTO data){
+    public ResponseEntity<UserDTO> register(@RequestBody @Valid RegisterDTO data){
         if(this.repository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -59,9 +59,14 @@ public class AuthenticationController {
 
         User save = this.repository.save(newUser);
 
-        RegisterDTO userLogged = new RegisterDTO(save.getId(), save.getLogin(), save.getEmail(), save.getRole());
 
-        return ResponseEntity.ok().body(userLogged);
+        UserDTO userCreated = new UserDTO(
+                save.getId(),
+                save.getLogin(),
+                save.getEmail(),
+                save.getUsername()
+        );
+        return ResponseEntity.ok().body(userCreated);
     }
 
 
