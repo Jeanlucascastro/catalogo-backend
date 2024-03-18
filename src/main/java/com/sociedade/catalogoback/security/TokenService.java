@@ -48,4 +48,21 @@ public class TokenService {
     private Instant genExpirationDate(){
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
+
+    public Boolean validateUserToken(String userName, String token){
+
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String subject = JWT.require(algorithm)
+                    .withIssuer("auth-api")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+
+            System.out.println("O que " + subject);
+            return userName.equals(subject);
+        } catch (JWTVerificationException exception){
+            return false;
+        }
+    }
 }

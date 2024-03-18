@@ -3,6 +3,7 @@ package com.sociedade.catalogoback.services;
 import com.sociedade.catalogoback.domain.company.Company;
 import com.sociedade.catalogoback.domain.user.User;
 import com.sociedade.catalogoback.repositories.UserRepository;
+import com.sociedade.catalogoback.security.TokenService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,10 @@ public class AuthorizationService implements UserDetailsService {
 
     @Autowired
     UserRepository repository;
+
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByLogin(username);
@@ -45,4 +50,18 @@ public class AuthorizationService implements UserDetailsService {
         existingUser.setDeleted(true);
         return repository.save(existingUser);
     }
+
+    public Boolean validateToken(String token) {
+        return !this.tokenService.validateToken(token).isEmpty();
+    }
+
+    public Boolean validateUserToken(String id, String token) {
+        Optional<User> user = repository.findById(id);
+        System.out.println("User " + user.get().getUsername());
+
+        User us = user.get();
+        return this.tokenService.validateUserToken(us.getUsername(), token);
+
+    }
+
 }

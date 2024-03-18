@@ -40,6 +40,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/company").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/company").permitAll()
                         .requestMatchers(HttpMethod.GET,"/swagger-ui/").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/auth/validate").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
