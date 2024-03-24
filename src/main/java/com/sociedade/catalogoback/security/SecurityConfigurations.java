@@ -41,6 +41,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.GET, "/company").permitAll()
                         .requestMatchers(HttpMethod.GET,"/swagger-ui/").permitAll()
                         .requestMatchers(HttpMethod.GET,"/auth/validate").permitAll()
+                        .requestMatchers(HttpMethod.GET,"*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
