@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,15 @@ public class AuthenticationController {
         User user = (User) this.repository.findByLogin(data.login());
         UserDTO userDTO = new UserDTO(user.getId(), user.getLogin(), user.getEmail(), user.getUsername());
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+        boolean isAdmin = false;
+
+        for (GrantedAuthority role : user.getAuthorities()) {
+            if ("ROLE_ADMIN".equals(role.getAuthority())) {
+                isAdmin = true;
+            }
+        }
+
+        var token = tokenService.generateToken((User) auth.getPrincipal(),isAdmin);
 
         return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
     }

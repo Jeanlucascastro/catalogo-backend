@@ -18,13 +18,14 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User user){
+    public String generateToken(User user, boolean isAdmin){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer("auth-api")
                     .withSubject(user.getLogin())
                     .withExpiresAt(genExpirationDate())
+                    .withClaim("isAdmin", isAdmin)
                     .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
@@ -59,7 +60,6 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
 
-            System.out.println("O que " + subject);
             return userName.equals(subject);
         } catch (JWTVerificationException exception){
             return false;
