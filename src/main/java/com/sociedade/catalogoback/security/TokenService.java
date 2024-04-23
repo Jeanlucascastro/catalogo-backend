@@ -19,7 +19,7 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User user, Map<String, Object> claims){
+    public String generateToken(User user){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
 

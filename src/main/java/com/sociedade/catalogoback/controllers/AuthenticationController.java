@@ -51,11 +51,7 @@ public class AuthenticationController {
             }
         }
 
-        Map<String, Object> additionalClaims = new HashMap<>();
-        additionalClaims.put("department", user.getAuthorities());
-        additionalClaims.put("role", user.getRole());
-
-        var token = tokenService.generateToken((User) auth.getPrincipal(), additionalClaims);
+        var token = tokenService.generateToken((User) auth.getPrincipal());
 
         return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
     }
