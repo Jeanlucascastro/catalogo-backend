@@ -31,6 +31,10 @@ public class User implements UserDetails {
     @Setter
     private UserRole role;
 
+    @Getter
+    @Setter
+    private List<String> claims = new ArrayList<>();
+
     @Setter
     private Boolean deleted;
 

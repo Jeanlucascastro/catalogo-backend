@@ -21,9 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("auth")
@@ -53,7 +51,11 @@ public class AuthenticationController {
             }
         }
 
-        var token = tokenService.generateToken((User) auth.getPrincipal(),isAdmin);
+        Map<String, Object> additionalClaims = new HashMap<>();
+        additionalClaims.put("department", user.getAuthorities());
+        additionalClaims.put("role", user.getRole());
+
+        var token = tokenService.generateToken((User) auth.getPrincipal(), additionalClaims);
 
         return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
     }
@@ -64,7 +66,7 @@ public class AuthenticationController {
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         List<Company> companies = Collections.emptyList();
-        User newUser = new User(null, data.login(), data.email(), encryptedPassword, data.role(), false, companies);
+        User newUser = new User(null, data.login(), data.email(), encryptedPassword, data.role(), null, false, companies);
 
         User save = this.repository.save(newUser);
 

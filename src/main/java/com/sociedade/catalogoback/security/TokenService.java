@@ -12,20 +12,24 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.*;
 
 @Service
 public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User user, boolean isAdmin){
+    public String generateToken(User user, Map<String, Object> claims){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            String[] userClaims = user.getClaims().toArray(new String[0]);
+
             String token = JWT.create()
                     .withIssuer("auth-api")
                     .withSubject(user.getLogin())
                     .withExpiresAt(genExpirationDate())
-                    .withClaim("isAdmin", isAdmin)
+                    .withArrayClaim("user_claims", userClaims)
                     .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
